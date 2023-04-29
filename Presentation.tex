@@ -1,0 +1,189 @@
+%----------------
+% Math Skills 1: Beamer template
+%-----------------
+
+\documentclass[10pt]{beamer}
+
+\usetheme{Madrid}
+
+\mode<presentation>
+
+\title[Numerical Methods]{Numerical Method for ODE's}
+
+\author[Akash Gopinath]{Akash Gopinath}
+\institute[Maths, York]{University of York, UK }
+%%%%%%%%% PREAMBLE %%%%%%%%%%%
+
+
+\usepackage{graphicx}
+\usepackage{graphicx, epstopdf}
+\usepackage{caption}
+\usepackage{subcaption}
+
+\usepackage{lmodern}
+\usepackage{tcolorbox}
+
+\newtcolorbox{mybox}[3][]
+{
+	colframe = #2!100,
+	colback  = #2!10,
+	coltitle = #2!20!black,  
+	#1,
+}
+
+
+
+\usepackage{color} %red, green, blue, yellow, cyan, magenta, black, white
+\definecolor{mygreen}{RGB}{28,172,0} % color values Red, Green, Blue
+\definecolor{mylilas}{RGB}{170,55,241}
+\definecolor{myblue}{RGB}{51,51,178}
+
+\usepackage{amsmath}
+\usepackage{amsrefs}
+\usepackage{amsmath}
+\newtheorem{defn}{Definition}
+\newtheorem{propn}{Proposition}
+\newtheorem{thm}{Theorem}
+\newtheorem{cor}{Corollary}
+\usepackage{xpatch}
+
+\xpatchcmd{\proof}
+{\itshape}
+{\bfseries}
+{}
+{}
+
+
+
+\newcommand{\ndiv}{\hspace{-4pt}\not|\hspace{2pt}}
+%%%%%%%%% PREAMBLE %%%%%%%%%%%%
+\begin{document}
+	
+	\maketitle
+	
+	\begin{frame}
+		\frametitle{Why use Numerical Methods}
+		\begin{itemize}
+			\item So far in our course we have been solving Ordinary Differential Equations \textbf{analytically} i.e. we have been finding {\bf exact} solutions.
+			
+			\vspace{5px}
+			
+			\item But a lot of the problems we solve may not have analytical solutions or might be too difficult to solve analytically.
+			
+			\vspace{5px}
+			
+			\item And a lot of the time, the problems we are trying to solve will be too complicated and computers will be employed to help us solve the problem.
+			
+			\vspace{5px}
+			
+			\item In both of these an many other cases, Numerical Methods are employed
+			
+			\vspace{5px}
+			
+			\item {\bf Note:} Numerical methods do not give exact {\bf solutions} but {\bf approximations}
+		\end{itemize}
+	\end{frame}
+
+
+	\begin{frame}
+		\frametitle{Euler's Method}
+		\begin{itemize}
+			\item The method we will be discussing today is Euler's Method
+				\begin{mybox}{myblue}{A blue box}
+			\begin{center}
+				\underline{\textbf{Euler's Method Algorithm:}}
+			\end{center}
+			Let:
+			$$\frac{dy}{dt} = f(y,t)$$
+			be an ODE with solution $y(t)$ on the interval $[a,b]$ with initial value $y(a) = y(t_0) = y_0$\\
+			Let $\displaystyle t_k = t_{k-1} + h  \Rightarrow t_k = t_0 + kh$ where $$\displaystyle h = \frac{b-a}{n}$$ and n is the number of data points. Then
+			$$\boldsymbol{y_k = y_{k-1} + f(t_{k-1}, y_{k-1})h}$$
+			where $y_k \approx y(t_k)$ for $t_k$ where $k \in \{1, \ldots, n\}$.
+			\end{mybox}
+		\end{itemize}
+	\end{frame}
+
+	\begin{frame}
+		\begin{itemize}
+			\item The key {\bf mathematical idea} is:
+			\begin{mybox}{myblue}{A blue box}
+			 At each step the approximation of the graph of the unknown solution $y(t)$ is done by the {\bf tangent line}.
+			\end{mybox}
+		% \pause
+		\item In this presentation I will show you the algorithm in play by solving the following initial value problem (IVP):
+		$$\frac{dy}{dx} = e^x \ \ \ \ \text{on the interval} \ \ [2,3]$$
+		\item {\bf Note:} This example was only chosen for simplicity. I could have chosen many other examples.
+		\item The exact solution to this IVP (not surprisingly) is:
+		$$y = e^x$$
+			
+		\end{itemize}
+	\end{frame}
+
+
+	\begin{frame}
+		\frametitle{Euler's Method in action!!!!!!!}
+		\begin{itemize}
+			
+			\item First I will show you how it works for just two {\bf 2 data points} 1 iteration at a time:
+			
+			\begin{enumerate}
+				\item Iteration 1:
+					\begin{figure}[h]
+						\includegraphics[width=0.6\textwidth,height=0.6\textheight,keepaspectratio]{graph1.eps}
+					\end{figure}
+			\end{enumerate}
+		
+	\end{itemize}
+	\end{frame}
+
+	\begin{frame}
+		
+		\begin{itemize}
+			\item The second iteration:
+			
+			\begin{enumerate}
+				\setcounter{enumi}{1}
+				\item Iteration 2:
+				\begin{figure}[h]
+					\includegraphics[width=0.6\textwidth,height=0.6\textheight,keepaspectratio]{graph2.eps}
+				\end{figure}
+			\end{enumerate}
+			
+		\end{itemize}
+		
+	\end{frame}
+
+	\begin{frame}
+		\frametitle{Wait a minute!, that is not a good approximation...}
+		Well as you can see the approximation does not look very good. But lets see what happens when we increase the number of data points
+		\begin{itemize}
+			\item When n = 3, i.e. We use 3 data points:
+		\begin{figure}[h]
+			\includegraphics[width=0.6\textwidth,height=0.6\textheight,keepaspectratio]{Graph2,3,3.eps}
+		\end{figure}
+		\end{itemize}
+	\end{frame}
+
+	\begin{frame}
+		
+		\begin{itemize}
+			\item When n = 10, i.e. We use 3 data points:
+			\begin{figure}[h]
+				\includegraphics[width=0.6\textwidth,height=0.6\textheight,keepaspectratio]{Graph2,10,3.eps}
+			\end{figure}
+		\end{itemize}
+	
+	\end{frame}
+
+		\begin{frame}
+		
+		\begin{itemize}
+			\item When n = 100, i.e. We use 3 data points:
+			\begin{figure}[h]
+				\includegraphics[width=0.6\textwidth,height=0.6\textheight,keepaspectratio]{Graph2,100,3.eps}
+			\end{figure}
+		\end{itemize}
+		
+	\end{frame}
+
+\end{document}

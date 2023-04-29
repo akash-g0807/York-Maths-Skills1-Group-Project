@@ -1,0 +1,504 @@
+\documentclass[11pt,a4paper]{amsart}
+
+%%%%%%%%% PREAMBLE %%%%%%%%%%%
+\usepackage{amsmath}
+\author{Akash Gopinath}
+\title{Numerical Method for Solving ODE's}
+\usepackage{amsrefs}
+\usepackage{amsmath}
+\usepackage{xpatch}
+\usepackage{cancel}
+
+\usepackage{graphicx}
+\usepackage{graphicx, epstopdf}
+\usepackage{caption}
+\usepackage{subcaption}
+
+
+\usepackage{lmodern}
+\usepackage{tcolorbox}
+
+%%%%%%%%%%%%% MATLAB PRETTIFIER %%%%%%%%%%%%%
+\usepackage{matlab-prettifier}
+\usepackage{listings}
+\usepackage{color} %red, green, blue, yellow, cyan, magenta, black, white
+\definecolor{mygreen}{RGB}{28,172,0} % color values Red, Green, Blue
+\definecolor{mylilas}{RGB}{170,55,241}
+
+\usepackage{sourcecodepro}
+\usepackage[T1]{fontenc}
+\lstset{basicstyle=\ttfamily\small}
+
+\lstset{language=Matlab,%
+    %basicstyle=\color{red},
+    breaklines=true,%
+    morekeywords={matlab2tikz},
+    keywordstyle=\color{blue},%
+    morekeywords=[2]{1}, keywordstyle=[2]{\color{black}},
+    identifierstyle=\color{black},%
+    stringstyle=\color{mylilas},
+    commentstyle=\color{mygreen},%
+    showstringspaces=false,%without this there will be a symbol in the places where there is a space
+    numbers=left,%
+    numberstyle={\tiny \color{black}},% size of the numbers
+    numbersep=9pt, % this defines how far the numbers are from the text
+    emph=[1]{break},emphstyle=[1]\color{red}, %some words to emphasise
+    %emph=[2]{word1,word2}, emphstyle=[2]{style}, 
+	frame = single,
+	breakatwhitespace=false, % sets if automatic breaks should only happen at whitespace
+	breaklines=true, % sets automatic line breaking
+	captionpos=b, % sets the caption-position to bottom
+	keepspaces=true, % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+	tabsize=2   
+}
+%%%%%%%%%%%%% MATLAB PRETTIFIER %%%%%%%%%%%%%
+
+\setlength{\textwidth}{\paperwidth}
+\addtolength{\textwidth}{-1.8in}
+\calclayout
+
+\newtheorem{defn}{Definition}
+\newtheorem{propn}{Proposition}
+\newtheorem{thm}{Theorem}
+\newtheorem{cor}{Corollary}
+\xpatchcmd{\proof}
+{\itshape}
+{\bfseries}
+{}
+{}
+
+\newcommand{\ndiv}{\hspace{-4pt}\not|\hspace{2pt}}
+%%%%%%%%% PREAMBLE %%%%%%%%%%%%
+
+\begin{document}
+	
+	%%%%%%% ABSTRACT %%%%%%%%%%%%%
+	\begin{abstract}
+		This paper will explain the simplest method used to solve Ordinary Differential Equations with initial values which is Euler's Method. It will also explore the two main types of errors that occur using this method and at in what order the error increases. This will also lead into a brief discussion about the efficiency of this algorithm and what other methods may used
+	\end{abstract}
+	%%%%%% ABSTRACT %%%%%%%%%%%%%
+	
+	\maketitle
+\vspace{-20px}
+	\section{Why use Numerical Methods}
+	Many differential equations we encounter when solving problems will not have analytical solutions. Furthermore many differential equations will be hard to solve analytically and will be solved on computers. In both of these cases Numerical approximations are used to solve differential equations. Even though we won't get exact solutions, the idea is to get the solution accurate enough to be useful for real world purposes. Numerical methods have numerous applications such as in Physics engines and simulations, computer software such as MATLAB.
+	
+	\subsection{Types of Numerical Methods for solving ODE's}
+	The two main types of Numerical methods \cite{polking,boyce} for solving ODE's with initial values are:
+	\begin{enumerate}
+		\item {\bf Euler's Method:} Also known as tangent line approximation. This is the simplest way to solve differential equations and can be inaccurate at times
+		\item {\bf Runge-Kutta Integration:} This can be seen as an extension of Euler's method, It is more accurate and efficient than Euler's method.
+	\end{enumerate}
+	In this paper I will explore the simple but exciting {\bf Euler's Method}
+	
+	\section{Initial building blocks}
+	Consider the initial value problem on interval $[a,b]$
+	$$y' = f(y,t) \ \ \ \ \ \ y(a) = y_0$$
+	where $a \leq t \leq b$
+	
+	Suppose a solution exists (which we do not know) and lets call it $y(t)$.\
+	Choose a discrete set points known as {\bf data points} 
+	$$t_0 = a < t_1 < t_2 < \cdots < t_{n} = b$$
+	$y_0, y_1 \cdots y_N$ are the set of points such that:
+	\begin{itemize}
+		\item $y_0 = y(t_0) = y(a)$ \ which is a given point
+		\item $y_k \approx y(t_k) \ \ \text{for} \ \ k \in \{1, \cdots ,n\}$
+	\end{itemize}
+	
+	Taking the tangent line at point $t_0$
+	
+	\clearpage
+	\section{Euler's Method} 
+	Euler's method is a type of {\bf fixed step solver}.\cite{polking}. This means is that we choose the discrete set of values such that it divides the \textbf{interval} $\boldsymbol{[a,b]}$ into n equal subintervals. 
+	So the {\bf step size} is: 
+	$$h = \frac{b-a}{n}$$
+	and we can construct the points $t_0, t_1, \cdots t_n$ in the following way:
+	\begin{itemize}
+		\item $a = t_0$ \ from the initial condition
+		\item $t_k = t_{k-1} + h \ \Rightarrow \ t_k =  t_0 + kh$ \ for \ $k \in \{1, \cdots n\}$
+	\end{itemize}
+	\vspace{2px}
+	The values of dependant variable $y_k$ will be chosen {\bf iteratively}. Here is the key mathematical idea:
+	
+	\begin{tcolorbox}
+		\textbf{Mathematical idea:} At each step the approximation of the graph of the unknown solution $y(t)$ is done by the tangent line.
+	\end{tcolorbox}
+
+	Let $\boldsymbol{\phi(t)}$ be the tangent function. The algorithm is derived in the following way:
+	
+	\begin{itemize}
+		\item First calculate the tangent line at point $(t_0, y(t_0))$
+			\begin{equation}
+				\phi(t) = y(t_0) + y^{'}(t_0)(t-t_0)
+			\end{equation}
+		\item Our initial condition is $y(t_0) = y_0$. Furthermore our differential equation tells us that $\displaystyle y' = f(t_0, y(t_0)) = f(t_0, y_0)$
+		So by substitution equation (1) becomes:
+			\begin{equation}
+				\phi(t) = y_0 + f(t_0, y_0)(t-t_0)
+			\end{equation}
+		Notice that although we do not know $y(t)$, everything on the right hand side is computable in equation (2).
+		\vspace{2px}
+		\item In particular for $t_1 = t_0 + h$:
+			\begin{equation}
+				\phi(t_1) = y_0 + f(t_0, y_0)h
+			\end{equation}
+		\item We now define $\phi(t_1)$ the tangent function to be the point $y_1$
+			\begin{equation}
+				y_1 = y_0 + f(t_0, y_0)h
+			\end{equation}
+		This is the first step of Euler's algorithm. A graph is plotted below with an example differential equation $y^{'} = e^x$
+	\end{itemize}
+	\begin{figure}[h]
+		\includegraphics[width=0.45\textwidth,height=0.45\textheight,keepaspectratio]{graph1.eps}
+	\end{figure}
+	
+	Now that we have computed $y_1$ and $t_1$, we compute $y_2$ and $t_2$ in the same way we computed $y_1$ and $t_1$. But starting with $y(t_1)$ and $t_1$ instead of $y_0$ and $t_0$. Assuming that $y_1$ can be approximated by $y(t_1)$.\\ 
+	Calculating tangent at point $(t_1, y(t_1))$,
+	\begin{equation}
+		\phi(t) = y(t_1) + y^{'}(t_1)(t-t_1)
+	\end{equation}
+	Since $y_1 \approx y(t_1)$ and the fact that from the differential equation gradient at point $y_1$ is $f(t_1, y_1)$
+	\begin{equation}
+		\phi(t) = y_1 + f(t_1, y_1)(t-t_1)
+	\end{equation}
+	In particular for $t = t_2 = t_1 + h$
+	\begin{equation}
+		\phi(t_2) = y_1 + f(t_1, y_1)h
+	\end{equation}
+	And setting $\phi(t_2) = y_2$
+	\begin{equation}
+		y_2 = y_1 + f(t_1, y_1)h
+	\end{equation}
+
+	Plotting this tangent in MATLAB:
+	\begin{figure}[h]
+		\includegraphics[width=0.45\textwidth,height=0.45\textheight,keepaspectratio]{graph2.eps}
+	\end{figure}
+
+	Continuing a similar process until $t=b$ then we get the following formula for $y_k$,
+	$$\boldsymbol{y_k = y_{k-1} + f(t_{k-1}, y_{k-1})h}$$
+	
+	\vspace{2px}
+	Therefore we get the following formula/Algorithm for Euler's Method \cite{burden}:
+	\begin{tcolorbox}
+		\begin{center}
+		\underline{\textbf{Euler's Method Algorithm:}}
+		\end{center}
+	Let:
+	$$\frac{dy}{dt} = f(y,t)$$
+	be an ODE with solution $y(t)$ on the interval $[a,b]$ with initial value $y(a) = y(t_0) = y_0$\\
+	Let $\displaystyle t_k = t_{k-1} + h  \Rightarrow t_k = t_0 + kh$ where $$\displaystyle h = \frac{b-a}{n}$$ and n is the number of data points. Then
+	$$\boldsymbol{y_k = y_{k-1} + f(t_{k-1}, y_{k-1})h}$$
+	where $y_k \approx y(t_k)$ for $t_k$ where $k \in \{1, \ldots, n\}$.
+	
+	
+	\end{tcolorbox}
+	
+	Here is the MATLAB code depicting the algorithm. It also plots the graph of the solution as well as the approximation.
+	
+	\lstinputlisting{more_complex_eulers_method.m}
+
+\subsection{Example:}In this subsection I will be using Euler's method to approximate the differential equation 
+$$y^{'} = e^x$$
+with initial condition $y_0 = e^2$ and over interval $[2,3]$.\\
+Of course this is only for simplicity but this method can be applied to any ODE by adjusting the algorithm accordingly. I will be plotting the graph of the exact solution and the approximated solution with varying step sizes.\\
+
+\subsubsection*{1. Exact solution:} This differential equation can be solved analytically. This was chosen to show the algorithm works with resect to the exact solution The solution is given by:
+$$y^{'} = e^{x} \ \Rightarrow \ \int^{y}_{y_0}dy = \int_{2}^{x}e^x dx$$
+\vspace{5px}
+\hspace{195px} $\displaystyle \Rightarrow y - y_0 = e^x - e^2$
+
+\vspace{5px}
+\hspace{186px} $\displaystyle \Rightarrow y - \cancel{y_0} = e^x - \cancel{e^2}$
+
+\vspace{5px}
+\hspace{185px} $\displaystyle \Rightarrow y = e^x$
+
+\subsubsection*{2. Approximation when N = 3:} Now we will approximate the solution using Euler's method. The number of data points is 3. Here  the step size is $h = \frac{3-2}{3} = \frac{1}{3}$
+Applying the formula and plotting the graph we get the following:
+
+\subsubsection*{3. Approximation when N = 10:} Now we will approximate the solution using Euler's method. The number of data points is 3. Here  the step size is $h = \frac{3-2}{10} = \frac{1}{10}$
+Applying the formula and plotting the graph we get the following:
+
+\subsubsection*{4. Approximation when N = 100:} Now we will approximate the solution using Euler's method. The number of data points is 3. Here  the step size is $h = \frac{3-2}{100} = \frac{1}{100}$
+Applying the formula and plotting the graph we get the following:
+
+\vspace{5px}
+Looking at the graphs made my the code written in MATLAB we can deduce the following results from the graphs below. ({\em in the graphs below the {\bf \em blue line is the exact solution} and the {\bf \em red points are the approximation}. The line joining the red points is the curve approximation}.)
+\begin{enumerate}
+	\item As we can see from the above graphs, the approximation gets better as the step size decreases.
+	\item The approximation is not very good when N = 3. This is because the step size is too large.
+	\item The approximation is very good when N = 100. This is because the step size is very small.
+	\item Error made in approximation decreases and tend to 0 as the approximation step size goes to 0 i.e. N goes to $\infty$.
+	\item Error made in approximation increases as the data points increases, like observing the last few values in case N = 100 and N = 10 the error made is higher than the initial values. This is due to the accumulated error i.e. global truncation error.
+\clearpage
+\end{enumerate}
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}[b,h]{0.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Graph2,3,3.eps}
+		\caption{$N=3$}
+		\label{fig:y equals x}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b,h]{0.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Graph2,10,3.eps}
+		\caption{$N=10$}
+		\label{fig:three sin x}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b,h]{0.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Graph2,100,3.eps}
+		\caption{$N=100$}
+		\label{fig:five over x}
+	\end{subfigure}
+	   \caption{Three simple graphs}
+	   \label{fig:three graphs}
+\end{figure}
+
+\subsection{Error Analysis of Euler's Method} As we saw from the example above, error made in approximation decreases and tend to 0 as the approximation step size goes to 0.
+Examining errors made in Euler's method, there are two types of errors made in Numerical Methods:
+\begin{enumerate}
+	\item {\bf Truncation error}
+	\item {\bf Round off error}
+\end{enumerate}
+We will first examine the truncation error.
+\vspace{-5px}
+\subsubsection*{1. Truncation error: \cite{buchanan, burden}}
+Truncation error arises from the fact that we are approximating the solution using a polynomial of lower order. In the case of Euler's method, we are approximating the solution using a linear polynomial, i.e. first order Taylor's Polynomial.
+So it is the error made by approximating the solution using a polynomial of lower order, basically truncating the rest of the numerical process. The error is due to truncating the series and is inherent in the method.\\ It has nothing to do with the computer or the programming language.\\
+We will examine error using {\bf Taylor's Polynomial}. The Taylor's polynomial of order $n$ is by the following (about point $x_k$)\cite{thomas, burden}
+$$P_n(x_k + h) = f(x_k) + f^{'}(x_k)h + \frac{f^{''}(x_k)}{2!}h^2 + \ \cdots \ + \frac{f^{(n)}(x_k)}{n!}h^n$$
+
+Using {\bf Taylor's theorem}, we can write any function as a sum of a Taylor's polynomial of order n and a remainder:
+$$f(x_k + h) = P_n(x_k + h) + R_n(x_k + h)$$
+Therefore using Taylor's polynomial of order 1 using the fact that $x_{k+1} = x_k + h$:
+$$f(x_{k + 1}) = f(x_k) + f^{'}(x_k)h + R_1(x_{k+1})$$
+Using the {\bf Lagrange formula for remainder}\cite{thomas}:
+$$R_1(x_k + h) = \frac{h^2}{2!}f^{''}(c)$$
+where $c$ is some point in the interval $x_k < c < x_{k+1}$. 
+So we get the following equation:
+$$f(x_{k + 1}) = f(x_k) + f^{'}(x_k)h + \frac{h^2}{2!}f^{''}(c)$$
+
+Setting $f(x_k) = y(t_k)$ for $x_k = t_k$ and from the differential equation $y^{'}(t_k) = f(x_k, y(t_k))$, we get the following equation:
+$$y(t_{k+1}) = y(t_k) + f(t_k, y(t_k))h + \frac{h^2}{2!}y^{''}(c)$$
+where $c$ is some point in the interval $t_k < c < t_{k+1}$.
+The last term is basically the error and it depends on the square of the step.
+
+There are two types of Truncation errors: \textbf{1. Global Truncation error} and \textbf{2. Local Truncation error}.
+First we will look at Local truncation error
+
+\subsubsection{Local Truncation error:}\cite{atkinson, boyce, buchanan} Local Truncation error is basically the error made locally at each step. So assuming the calculation or the approximation at the last step was correct what is the error caused in the current step. Calculating the error made locally at each step:
+$$y(t_{k+1}) - y_{k+1} = [y(t_k) + f(t_k, y(t_k))h + \frac{h^2}{2}y^{''}(c)] - [y_k + f(t_k, y_k)h]$$
+\vspace{14px}
+\hspace{140px} $\displaystyle = [y(t_k)-y_k] + h[f(t_k,y(t_k)) - f(t_k, y_k)] + \frac{h^2}{2}y^{''}(c)$\\
+Since we want to find the local truncation error, i.e. the individual error at each step, we will set $y(t_k) = y_k$ and $f(t_k, y(t_k)) = f(t_k, y_k)$. Therefore, we get:
+$$y(t_{k+1}) - y_{k+1} = \frac{h^2}{2}y^{''}(c)$$
+Applying the {\bf remainder estimation theorem}\cite{thomas} we can find an {\bf upper bound for the local truncation error}:
+$$|y(t_{k+1}) - y_{k+1}| \leq \frac{Mh^2}{2}$$
+where $M$ is the maximum value of the second derivative of $y(t)$ in the interval $t_k < t < t_{k+1}$.
+As we can see the error is proportional to the square of the step size i.e. error is on the order of $h^2$. This can be represented by the {\em \bf big O notation}.
+\begin{tcolorbox}
+	The error is $O(h^2)$ every step locally
+\end{tcolorbox}
+Which means error is of order $h^2$ locally. So local truncation error goes increases proportional to the square of the step size.
+\subsubsection{Global Truncation error:} \cite{buchanan, atkinson} Global Truncation error is the cumulative effect of the local truncation error at each step through the interval until say time $t = t_k$
+$$\displaystyle y(t_{k+1}) - y_{k+1} = [y(t_k)-y_k] + h[f(t_k,y(t_k)) - f(t_k, y_k)] + \frac{h^2}{2}y^{''}(c)$$
+Applying absolute value to both sides and by the triangle inequality:
+$$|y(t_{k+1}) - y_{k+1}| \ \leq \ |y(t_k)-y_k| + h|f(t_k,y(t_k)) - f(t_k, y_k)| + |\frac{h^2}{2}y^{''}(c)|$$
+Using notation $e_k = y(t_k)-y_k$
+$$|e_{k+1}| \leq |e_k| + h|f(t_k,y(t_k)) - f(t_k, y_k)| + |\frac{h^2}{2}y^{''}(c)|$$
+Since $t_k$ is a fixed constant in this equation, applying new notation:
+$$f(t_k, y_k) = g_{t_k}(y_k) \ \ \ \text{and} \ \ \ f(t_k, y(t_k)) = g_{t_k}(y(t_k))$$
+Therefore the equation becomes 
+$$|e_{k+1}| \leq |e_k| + h|g_{t_k}(y(t_k)) - g_{t_k}(y_k)| + |\frac{h^2}{2}y^{''}(c)|$$
+Using the mean value theorem which is:
+$$f(c) = \frac{f(b) - f(a)}{b-a} \ \ \text{for some } c \in (a,b)$$
+And applying it to function $g$ we get the following equation:
+$$|e_{k+1}| \leq |e_k| + h|g_{t_k}^{'}(c)|\cdot|y(t_k) - y_k| + |\frac{h^2}{2}y^{''}(c)|$$
+for some c in between $y(t_k)$ and $y_k$
+Assuming the function $g^{'}$ is sufficiently smooth, we can find a upper bound/maximum say $B \in \mathbb{R}$ by the extreme value theorem. Therefore we get the following chain of inequalities:
+$$|e_{k+1}| \leq |e_k| + h|g_{t_k}^{'}(c)|\cdot|y(t_k) - y_k| + |\frac{h^2}{2}y^{''}(c)|$$
+\hspace{144px} $\displaystyle \leq |e_k| + hB\cdot|e_k| + |\frac{h^2}{2}y^{''}(c)|$ \\ 
+
+\hspace{132px} $\displaystyle \leq |e_k| + hB\cdot|e_k| + \frac{Mh^2}{2}$\\
+Which finally gives us the following inequality:
+$$|e_{k+1}| \leq  (1+hB)\cdot|e_k| + \frac{Mh^2}{2}$$
+This is a recursive definition because the $(k+1)^{th}$ term depends on the $k^{th}$ term.
+We can write it recursively the following way (\emph{Note at $t_0$, $y(t_0) = y_0$ and therefore $e_0 = 0$)}):
+\begin{enumerate}
+	\item $\displaystyle |e_{1}| \leq  \frac{Mh^2}{2}$
+	\item $\displaystyle |e_{2}| \leq (1+Bh)|e_1| + \frac{Mh^2}{2} 			\ \Rightarrow \ |e_{2}| \leq (1+Bh)\frac{Mh^2}{2} + \frac{Mh^2}{2}$
+	\vspace{5px}
+	\item $\displaystyle |e_{3}| \leq (1+Bh)|e_2| +\frac{Mh^2}{2} \ \Rightarrow \ |e_{3}| \leq (1+Bh)^2\frac{Mh^2}{2} + (1+Bh)\frac{Mh^2}{2}+ \frac{Mh^2}{2}$
+\end{enumerate}
+and so on \ldots
+Continuing this process we get the following inequality (this can be proven by induction on $k$):
+$$|e_{k}| \leq \sum_{i=0}^{k-1}(1+Bh)^i\frac{Mh^2}{2}$$
+This is a geometric series, so we can use the formula for the sum of a geometric series to get the following inequality:
+$$|e_{k}| \leq \frac{(1+Bh)^k - 1}{Bh}\frac{Mh^2}{2} = \frac{M}{2B}[(1 + Bh)^k - 1]h$$
+We know from our initial setup that $\displaystyle h = \frac{t_k-t_0}{k}$ so the inequality becomes:
+$$|e_{k}| \leq \frac{M}{2B}[(1 + Bh)^{\frac{t_k - t_0}{h}} - 1]h$$
+Let x = $Bh$. Using the inequality $\displaystyle (1 + x)^N \leq e^{Nx}$,  \cite{burden} we get
+$$(1 + Bh)^{k} \leq e^{Bhk} \ \Rightarrow \ (1 + Bh)^{\frac{t_k - t_0}{h}} \leq e^{B(t_k - t_0)}$$
+So we get the following inequality ({\bf upper bound for global truncation error}):
+$$|e_{k}| \leq \frac{M}{2B}[e^{B(t_k - t_0)} - 1]h$$
+which gives an upper bound for the error.
+As we can see here, the global truncation error is proportional to the time step h, i.e.error is on the order of $h$.
+\begin{tcolorbox}
+	The error is globally $O(h)$ every step
+\end{tcolorbox}
+Which means error is of order $h$ globally. So local global error goes increases proportional to the step size.
+
+\vspace{5px}
+{\em Note:} Note how was the number of data points goes to infinity $N \rightarrow \infty$ i.e. the  step size goes to 0, $h \rightarrow 0$ the error bound in both local and global truncation error goes to 0. Therefore, the algorithm becomes more accurate as the step size goes to 0.
+
+\subsubsection*{2. Round-off Error}
+The round off error is due to the rounding made at each step in the Euler's method. This is because a computer does not have infinite precision and therefore it has to round off the numbers to a finite number of digits. This is called round off error. For example take the fraction \cite{buchanan, polking}
+$$\frac{1}{3} = 0.3333\ldots = 0.\bar{3}$$
+where $\bar{3}$ is the repeating part of the fraction. If we were to \textbf{round off the fraction to 4 digits}, we would get
+$$0.3333$$
+Next take fraction
+$$\frac{2}{3} = 0.6666\ldots = 0.\bar{6}$$
+If we were to \textbf{round up the fraction to 4 digits}, we would get
+$$0.6667$$
+Now computing the following 
+$$\frac{2}{3} - 2 \cdot \frac{1}{3}  = 0.6667 - 0.6666 = 0.0001$$
+We can see that the round off error is $0.0001$.
+If we had infinite precision the subtraction should be $0$. Round of error is much harder to analyze due to its random nature as it depends on the rounding of the computer, type of computer, type of rounding methods used etc.
+
+In the calculations done so far, we have assumed to have no rounding error. But if we were to consider it then we have the following results\cite{buchanan}:
+$$t_k = \tau_k + \delta_k$$
+Where the $\tau_k$ is the true value of $t_k$ and $\delta_k$ is the round off error. We can write the following:
+$$\gamma_0 = y(t_0) + \delta_0 \ \Rightarrow \ \gamma_0 = y_0 + \delta_0$$
+wheere $\gamma_0$ is the true value of $y(t_0)$ stored on the computer and $\delta_0$ is the round off error. We can then compute using Eulers method by the following formula:
+$$\gamma_{k+1} = \gamma_k + h\cdot f(t_k, \gamma_k) + \delta_{k+1}$$
+where $\delta_{k+1}$ is the round off error. Then finding the truncation error of the algorithm using considering rounding error is very similar to previous calculations but is omitted here for brevity.
+
+\section{Adapting higher order differential equations}
+In this section we will discuss how to adapt the Euler's method to solve higher order differential equations \cite{buchanan, atkinson, gerald}. 
+
+Assume we have a nth order differential equation of the form:
+$$y^{(n)}(t) = f(t, y(t), y'(t), y''(t), \ldots, y^{(n-1)}(t))$$
+with initial condition $y(t_0) = y_0, \ y'(t_0) = y_0' , \  \ldots \  ,y^{n-1}(t_0) = y_{0}^{n-1}$ 
+We can rewrite this as a system of first order differential equations by defining the following:
+$$\begin{cases}
+y_1(t) := y(t)\\
+y_2(t) := y'(t)\\
+\vdots\\
+y_n(t) := y^{n-1}(t)\\
+\end{cases}$$
+We then get the following system of first order differential equations with initial values:
+$$\begin{cases}
+y_1'(t) = y_2(t)\hspace{160px} y_1(t_0) = y_0\\
+y_2'(t) = y_3(t) \hspace{160px} y_2(t_0) = y'_0\\
+\vdots \hspace{230px} \vdots\\
+y_{n-1}'(t) = y_n(t) \hspace{150px} y_{n-1}(t_0) = y^{n-2}_0\\
+y_n'(t) = f(t, y_1(t), y_2(t), \ldots, y_n(t)) \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ y_{n}(t_0) = y^{n-1}_0\\
+\end{cases}$$
+We can then solve this system of first order differential equations using the Euler's method.
+\section{Conclusion and Beyond Euler}
+In this paper we have discussed the Euler's method for solving ODEs. We have seen that Euler's method is a \textbf{first order method} and is not very accurate. We have also seen that the {\bf local truncation error} is proportional to the step size $h^2$ and the {\bf global truncation error} is proportional to $h$. We have also seen that the round off error is random and is very hard to analyse. We have also seen that the Euler's method is not very accurate as it requires a lot of steps and hence iterations to be accurate. Therefore, a more accurate algorithm known as {\bf Runge-Kutta} method is used.
+
+The Runge-Kutta Method uses higher order Taylor polynomials to approximate the solution of the ODE\cite{buchanan, burden, polking}. The Runge Kutta method is a family of methods which includes different methods of different order. The most popular methods are the 2nd order Runge Kutta method, 3rd order Runge Kutta method and the 4th order Runge Kutta method. The 4th order Runge Kutta method is the most popular and is used in most of the applications. 
+
+{\bf \em Note:} Since the Euler's method is based on first order Taylor's polynomials, it is called the first order Runge-Kutta method\cite{boyce}.
+
+The formula and algorithm for Runge-Kutta methods can be found in references given on the last page
+%%%%%%%%%%%%%%%%%% REFERENCES %%%%%%%%%%%%%%%%%%%%%%
+
+	\section*{References}
+	\begin{biblist}
+						
+		\bib{burden}{book}{
+			author={Faires, J. Douglas},
+			author={Burden, Richard},
+			title={Numerical methods},
+			edition={2},
+			note={With 1 IBM-PC floppy disk (3.5 inch; HD)},
+			publisher={Brooks/Cole Publishing Co., Pacific Grove, CA},
+			date={1998},
+			pages={xii+594},
+			isbn={0-534-35187-5},
+			review={\MR{1639937}},
+		}
+	
+			\bib{thomas}{book}{
+			author={Hass, Joel R.},
+			author={Heil, Christopher E.},
+			author={Weir, Maurice D.}, 
+			author={Bogacki, Przemyslaw},
+			title={Thomas' Calculus},
+			edition={14th ed, SI Units},
+			publisher={Pearson Educated Limited, Harlow, UK},
+			date={2020},
+			pages={xviii+1052},
+			isbn={1-292-25322-3},
+			
+		}
+
+		\bib{polking}{book}{
+			author={Polking, John},
+			author={Bogess, Arnold},
+			author={Arnold, David},
+			title={Differential Equations with Boundary Value Problems},
+			edition={2},
+			publisher={Pearson Education Inc, Upper Saddle River, NJ},
+			date={2005},
+			pages={xii+703},
+			isbn={0-13-186236-7},
+		}
+
+		\bib{buchanan}{book}{
+			author={Buchanan, James L.},
+			author={Turner, Peter R.},
+			title={Numerical Methods and Analysis},
+			edition={1},
+			publisher={McGraw-Hill Inc, Highstown, NJ},
+			date={1992},
+			pages={xii+746},
+			isbn={0-07-112922-7},
+		}
+
+		\bib{boyce}{book}{
+			author={Boyce, William E.},
+			author={DiPrima, Richard C.},
+			title={Elementary differential equations and boundary value problems},
+			publisher={John Wiley \& Sons, Inc., New York-London-Sydney},
+			date={1965},
+			pages={xi+485},
+			review={\MR{0179403}},
+		}
+
+		\bib{gerald}{book}{
+			author={Gerald, Curtis F.},
+			author={Wheatley, Patrick O.},
+			title={Applied numerical analysis},
+			edition={4},
+			publisher={Addison-Wesley Publishing Company, Advanced Book Program,
+			Reading, MA},
+			date={1989},
+			pages={xii+679+A36+I7},
+			isbn={0-201-11583-2},
+			review={\MR{984124}},
+		}
+
+		\bib{atkinson}{book}{
+			author={Atkinson, Kendall E.},
+			title={An introduction to numerical analysis},
+			edition={2},
+			publisher={John Wiley \& Sons, Inc., New York},
+			date={1989},
+			pages={xvi+693},
+			isbn={0-471-62489-6},
+			review={\MR{1007135}},
+		}
+			
+		
+	\end{biblist}
+	%%%%%%%%%%%%%%%%%% REFERENCES %%%%%%%%%%%%%%%%%%%%%%
+	
+\end{document}

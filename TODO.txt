@@ -1,0 +1,9 @@
+1) Definition of Global Truncation error
+2) Cleaning up MATLAB code and adding comments
+3) Definition of Rounding error
+4) Section on Rounding error
+5) Added sources - Done
+6) Cititing my paper
+7) Highlighting and bolding important stuff
+8) Definition of Local Truncation error
+9) Conclusion with mention of Runge Kutta

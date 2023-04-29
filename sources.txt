@@ -1,0 +1,24 @@
+Source 1: Tayors Thm and Remainder Theorem stuff boi
+	Books used: 1) Thomas Calculus
+		    2) Numerical Methods J. Douglas Faires Richard Burden page 9
+
+Source 2: Intial setup
+	Book used: 1) Polking Bogedd Arnold 
+		   2) Differential Equations Boyce
+
+Source 3: Proof of global truncation error
+	Book Used: 1) Introduction to Numerical Analysis by Kendall E Atkisnon	
+		   2) Numerical Methods J.Douglas Faires Richard Burdemn
+		   3) The website 
+
+Source 4: Global Truncation error and Rounding error
+	Book Used: 1) What is global truncation error in Euler's method: Numerical Analysis and Methods James L Buchanan pg 512-513
+		   2) What is rounding error and how it occurs: Same book as 1) and the pink differential equation book
+		   4) What is truncation error in Eulers Method: Applied Numerical Analysis Gerald Wheatley 
+
+Source 5: Rounding Error Section:
+	Books Used: 1) Definition Buchanan and Burden, 
+		    2) Polking Bogess example
+
+Source 6: Adapting for High order differential equations: 
+	Book Used: 1) Buchanan
